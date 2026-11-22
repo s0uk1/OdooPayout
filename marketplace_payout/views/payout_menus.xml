@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="payout_menu_root" name="Payouts" sequence="60"/>
+    <menuitem id="payout_payee_menu" name="Payees" parent="payout_menu_root"
+              action="payout_payee_action" sequence="10"/>
+</odoo>
