@@ -44,3 +44,39 @@ class TestPayoutPayee(TransactionCase):
         user = new_test_user(self.env, login='payout_outsider', groups='base.group_user')
         with self.assertRaises(AccessError):
             self.payee.with_user(user).read(['partner_id'])
+
+    def test_verify_then_block(self):
+        self.assertEqual(self.payee.state, 'draft')
+        self.payee.action_verify()
+        self.assertEqual(self.payee.state, 'verified')
+        self.payee.action_block()
+        self.assertEqual(self.payee.state, 'blocked')
+
+    def test_unblocked_payee_needs_new_verification(self):
+        self.payee.action_block()
+        self.payee.action_reset_to_draft()
+        self.assertEqual(self.payee.state, 'draft')
+
+    def test_invalid_transitions(self):
+        with self.assertRaises(UserError):
+            self.payee.action_reset_to_draft()
+        self.payee.action_verify()
+        with self.assertRaises(UserError):
+            self.payee.action_verify()
+        self.payee.action_block()
+        with self.assertRaises(UserError):
+            self.payee.action_block()
+
+    def test_mixed_batch_is_rejected_entirely(self):
+        verified = self.env['payout.payee'].create({
+            'partner_id': self.env['res.partner'].create({'name': 'Dune Leather'}).id,
+        })
+        verified.action_verify()
+        with self.assertRaises(UserError):
+            (self.payee | verified).action_verify()
+        self.assertEqual(self.payee.state, 'draft')
+
+    def test_copy_resets_state(self):
+        self.payee.action_verify()
+        copy = self.payee.copy({'company_id': self.other_company.id})
+        self.assertEqual(copy.state, 'draft')

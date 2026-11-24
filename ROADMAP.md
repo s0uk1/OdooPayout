@@ -3,7 +3,7 @@
 Each item is one small, tested slice.
 
 - [x] 1. Installable addon with the payee model
-- [ ] 2. Payee verification states (draft, verified, blocked)
+- [x] 2. Payee verification states (draft, verified, blocked)
 - [ ] 3. Payout user and manager groups, access rights
 - [ ] 4. Multi-company record rules
 - [ ] 5. Ledger entries (earnings, adjustments)

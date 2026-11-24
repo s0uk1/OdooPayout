@@ -8,6 +8,10 @@
                 <field name="partner_id"/>
                 <field name="currency_id"/>
                 <field name="company_id" groups="base.group_multi_company"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-success="state == 'verified'"
+                       decoration-danger="state == 'blocked'"/>
             </list>
         </field>
     </record>
@@ -17,6 +21,16 @@
         <field name="model">payout.payee</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_verify" type="object" string="Verify"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_block" type="object" string="Block"
+                            invisible="state == 'blocked'"
+                            confirm="Blocked payees cannot receive payouts. Continue?"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft"
+                            invisible="state != 'blocked'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,verified"/>
+                </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
@@ -37,7 +51,13 @@
         <field name="arch" type="xml">
             <search>
                 <field name="partner_id"/>
+                <filter name="to_verify" string="To Verify" domain="[('state', '=', 'draft')]"/>
+                <filter name="blocked" string="Blocked" domain="[('state', '=', 'blocked')]"/>
+                <separator/>
                 <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
             </search>
         </field>
     </record>
